@@ -14,8 +14,8 @@ Prerequisites
 
 Project requires
 
-* `neurokernel-retina`_
-* `neurokernel-lamina`_
+* `neurokernel-retina <https://github.com/neurokernel/retina>`_
+* `neurokernel-lamina <https://github.com/neurokernel/lamina>`_
 
 Since the project doesn't include source code the following command
 only verifies that dependencies are there ::
