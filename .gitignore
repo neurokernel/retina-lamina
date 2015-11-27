@@ -9,7 +9,6 @@
 *.mat
 *.mp4
 *.log
-*.png
 *.pyc
 *.sh
 *.swp
