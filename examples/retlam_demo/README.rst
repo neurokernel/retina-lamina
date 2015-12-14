@@ -21,9 +21,13 @@ User can edit this file or use a different one but in the latter case should
 provide the name to the script.
 
 Try
-$ ./run_retlam_demo.sh -h
+
+    $ ./run_retlam_demo.sh -h
+
 or
-$ python retlam_demo.py -h
+
+    $ python retlam_demo.py -h
+
 for all the available options
 
 Results
