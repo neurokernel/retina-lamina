@@ -17,7 +17,6 @@ x1 = -r1 .* cos(elevr1) .* cos(azimr1);
 z1 = r1 .* sin(elevr1);
 
 % read screen coordinates
-
 elevr2=h5read('grid_dima.h5','/array');
 azimr2=h5read('grid_dimb.h5','/array');
 r2 = 10;
@@ -33,8 +32,8 @@ R1input = inputs(1:6:end,:);
 R1 = output(1:6:end,:);
 
 output_caxis = [min(min(min(output(:,501:end)))), max(max(max(output(:,501:end))))];
-clear('inputs','outputs')
-screen=max(h5read('intensities.h5','/array'),0);
+clear('inputs','output')
+screen = max(h5read('intensities.h5','/array'),0);
 
 % read L1, L2 response
 lam = h5read('lamina_output0_gpot.h5','/array');
