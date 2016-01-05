@@ -67,4 +67,4 @@ if __name__ == "__main__":
             'https://github.com/neurokernel/retina/tarball/master#egg=neurokernel-retina-1.0',
             'https://github.com/neurokernel/lamina/tarball/master#egg=neurokernel-lamina-1.0'
         ]
-     )
+    )
