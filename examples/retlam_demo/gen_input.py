@@ -34,8 +34,8 @@ def gen_input(config):
     screen = screen_cls(config)
     screen.setup_file('intensities{}.h5'.format(suffix))
 
-    sio.write_memory_to_file(screen.grid[0], 'grid_dima.h5')
-    sio.write_memory_to_file(screen.grid[1], 'grid_dimb.h5')
+    sio.write_array(screen.grid[0], 'grid_dima.h5')
+    sio.write_array(screen.grid[1], 'grid_dimb.h5')
 
     for i in range(eye_num):
         retina_elev_file = 'retina_elev{}.h5'.format(i)
@@ -76,7 +76,7 @@ def gen_input(config):
                                (screen.grid[1], screen_dimb_file),
                                (rfs.refa, retina_dima_file),
                                (rfs.refb, retina_dimb_file)]:
-            sio.write_memory_to_file(data, filename)
+            sio.write_array(data, filename)
 
 
 def _get_receptive_fields(retina, screen, screen_type):
