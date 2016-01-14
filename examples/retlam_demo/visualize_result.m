@@ -1,12 +1,6 @@
 %% This visualization code requires MATLAB 2014b or later
 % at the end of execution, a movie named "testnat.mp4" will be created.
 
-% Required utility files:
-% fscatter3.m can be downloaded from:
-% http://www.mathworks.com/matlabcentral/fileexchange/2993-fscatter3-m
-% freezeColors can be downloaded from:
-% http://www.mathworks.com/matlabcentral/fileexchange/7943-freezecolors---unfreezecolors
-
 %% read simulation results
 % read ommatidia coordinates
 elevr1=h5read('retina_elev0.h5','/array');
