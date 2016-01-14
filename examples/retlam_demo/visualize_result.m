@@ -96,7 +96,7 @@ cmap = gray(256);
 for i = 2101:10:10000-20
     % screen intensity
     axis1 = subplot('position', [0.05, 0.7, 0.28, 0.28]);
-    p1 = surf(x,y,z, screen(:,:,(i-1)/10+1), 'edgecolor','none');
+    p1 = surf(x,y,z, screen(:,:,i), 'edgecolor','none');
     colormap('gray')
     view(view2)
     caxis(screen_caxis)
@@ -130,7 +130,7 @@ for i = 2101:10:10000-20
     
     % 3D perspective
     axis3 = subplot('position', [0.70, 0.7, 0.28, 0.28]);
-    p3 = surf(x,y,z, screen(:,:,(i-1)/10+1), 'edgecolor','none');
+    p3 = surf(x,y,z, screen(:,:,i), 'edgecolor','none');
     colormap('gray')
     view(117,16)
     caxis(screen_caxis)
@@ -168,7 +168,7 @@ for i = 2101:10:10000-20
     
     % log of Screen intensity
     axis4 = subplot('position', [0.05, 0.375, 0.28, 0.28]);
-    p4 = surf(x,y,z, log10(screen(:,:,(i-1)/10+1)), 'edgecolor','none');
+    p4 = surf(x,y,z, log10(screen(:,:,i)), 'edgecolor','none');
     colormap('gray')
     view(view2)
     caxis(screen_caxis_gc)
