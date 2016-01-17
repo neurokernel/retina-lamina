@@ -159,10 +159,9 @@ def connect_retina_lamina(config, i, retina, lamina, manager):
     retina_selectors = retina.get_all_selectors()
     lamina_selectors = lamina.get_all_selectors()
     with Timer('creation of Pattern object'):
-        pattern = Pattern(','.join(retina_selectors),
-                          ','.join(lamina_selectors))
+        from_list = []
+        to_list = []
 
-    with Timer('update of connections in Pattern object'):
         # accounts neural superposition
         rulemap = retina.rulemap
         for ret_sel in retina_selectors:
@@ -174,17 +173,16 @@ def connect_retina_lamina(config, i, retina, lamina, manager):
             lam_sel = lamina.get_selector(neighborid, n_name)
 
             # setup connection from retina to lamina
-            src, dest = ret_sel, lam_sel
+            from_list.append(ret_sel)
+            to_list.append(lam_sel)
 
-            try:
-                # specify port types and update pattern
-                pattern.interface[src, 'type'] = 'gpot'
-                pattern.interface[dest, 'type'] = 'gpot'
-                pattern[src, dest] = 1
-            except KeyError:
-                print('Warning {} or {} is not a valid selector!'
-                      .format(src, dest))
-                raise
+        pattern = Pattern.from_concat(','.join(retina_selectors),
+                                      ','.join(lamina_selectors),
+                                      from_sel=','.join(from_list),
+                                      to_sel=','.join(to_list),
+                                      gpot_sel=','.join(from_list+to_list))
+        nx.write_gexf(pattern.to_graph(), retina_id+'_'+lamina_id+'.gexf.gz',
+                      prettyprint=True)
 
     with Timer('update of connections in Manager'):
         manager.connect(retina_id, lamina_id, pattern, compat_check=False)
