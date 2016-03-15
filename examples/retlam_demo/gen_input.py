@@ -5,7 +5,7 @@ import atexit
 import numpy as np
 import pycuda.driver as cuda
 
-import neurokernel.LPU.utils.simpleio as sio
+from neurokernel.LPU.utils.simpleio import *
 
 import retina.retina as ret
 import retina.geometry.hexagon as hx
@@ -34,8 +34,8 @@ def gen_input(config):
     screen = screen_cls(config)
     screen.setup_file('intensities{}.h5'.format(suffix))
 
-    sio.write_array(screen.grid[0], 'grid_dima.h5')
-    sio.write_array(screen.grid[1], 'grid_dimb.h5')
+    write_array(screen.grid[0], 'grid_dima.h5')
+    write_array(screen.grid[1], 'grid_dimb.h5')
 
     for i in range(eye_num):
         retina_elev_file = 'retina_elev{}.h5'.format(i)
@@ -66,7 +66,7 @@ def gen_input(config):
             steps_batch = min(100, steps_count)
             im = screen.get_screen_intensity_steps(steps_batch)
             photor_inputs = rfs.filter(im)
-            sio.write_array(photor_inputs, filename=input_file, mode=write_mode)
+            write_array(photor_inputs, filename=input_file, mode=write_mode)
             steps_count -= steps_batch
             write_mode = 'a'
 
@@ -76,7 +76,7 @@ def gen_input(config):
                                (screen.grid[1], screen_dimb_file),
                                (rfs.refa, retina_dima_file),
                                (rfs.refb, retina_dimb_file)]:
-            sio.write_array(data, filename)
+            write_array(data, filename)
 
 
 def _get_receptive_fields(retina, screen, screen_type):
