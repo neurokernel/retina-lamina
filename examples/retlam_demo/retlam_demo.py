@@ -185,7 +185,7 @@ def connect_retina_lamina(config, i, retina, lamina, manager):
                       prettyprint=True)
 
     with Timer('update of connections in Manager'):
-        manager.connect(retina_id, lamina_id, pattern, compat_check=False)
+        manager.connect(retina_id, lamina_id, pattern)
 
 
 def start_simulation(config, manager):
