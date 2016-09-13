@@ -1,11 +1,12 @@
 from __future__ import division
 
 import atexit
+import os
 
 import numpy as np
 import pycuda.driver as cuda
 
-from neurokernel.LPU.utils.simpleio import *
+import neurokernel.LPU.utils.simpleio as sio
 
 import retina.retina as ret
 import retina.geometry.hexagon as hx
@@ -26,18 +27,20 @@ def gen_input(config):
     steps = config['General']['steps']
 
     input_filename = config['Retina']['input_file']
+    
+    screen_write_step = config['Retina']['screen_write_step']
+    config['Retina']['screen_write_step'] = 1
+    
     screen_type = config['Retina']['screentype']
     screen_cls = cls_map.get_screen_cls(screen_type)
     eulerangles = config['Retina']['eulerangles']
     radius = config['Retina']['radius']
 
-    screen = screen_cls(config)
-    screen.setup_file('intensities{}.h5'.format(suffix))
-
-    write_array(screen.grid[0], 'grid_dima.h5')
-    write_array(screen.grid[1], 'grid_dimb.h5')
-
     for i in range(eye_num):
+        screen = screen_cls(config)
+        screen_file = 'intensities_tmp{}.h5'.format(i)
+        screen.setup_file(screen_file)
+    
         retina_elev_file = 'retina_elev{}.h5'.format(i)
         retina_azim_file = 'retina_azim{}.h5'.format(i)
 
@@ -66,9 +69,16 @@ def gen_input(config):
             steps_batch = min(100, steps_count)
             im = screen.get_screen_intensity_steps(steps_batch)
             photor_inputs = rfs.filter(im)
-            write_array(photor_inputs, filename=input_file, mode=write_mode)
+            sio.write_array(photor_inputs, filename=input_file, mode=write_mode)
             steps_count -= steps_batch
             write_mode = 'a'
+        
+        tmp = sio.read_array(screen_file)
+        sio.write_array(tmp[::screen_write_step],
+                        'intensities{}{}.h5'.format(suffix, i),
+                        complevel = 9)
+        del tmp
+        os.remove(screen_file)
 
         for data, filename in [(elev_v, retina_elev_file),
                                (azim_v, retina_azim_file),
@@ -76,7 +86,7 @@ def gen_input(config):
                                (screen.grid[1], screen_dimb_file),
                                (rfs.refa, retina_dima_file),
                                (rfs.refb, retina_dimb_file)]:
-            write_array(data, filename)
+            sio.write_array(data, filename)
 
 
 def _get_receptive_fields(retina, screen, screen_type):
