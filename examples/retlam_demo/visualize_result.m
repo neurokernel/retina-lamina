@@ -1,36 +1,41 @@
 %% This visualization code requires MATLAB 2014b or later
 % at the end of execution, a movie named "testnat.mp4" will be created.
+% The visualization here assumes that you use the default specification,
+% i.e., running the simulation by leaving configuration file blank.
 
 %% read simulation results
 % read ommatidia coordinates
-elevr1=h5read('retina_elev0.h5','/array');
-azimr1=h5read('retina_azim0.h5','/array');
+elevr1 = h5read('retina_elev0.h5','/array');
+azimr1 = h5read('retina_azim0.h5','/array');
 r1 = 1;
 y1 = -r1 .* cos(elevr1) .* sin(azimr1);
 x1 = -r1 .* cos(elevr1) .* cos(azimr1);
 z1 = r1 .* sin(elevr1);
 
 % read screen coordinates
-elevr2=h5read('grid_dima.h5','/array');
-azimr2=h5read('grid_dimb.h5','/array');
+elevr2 = h5read('grid_dima0.h5','/array');
+azimr2 = h5read('grid_dimb0.h5','/array');
 r2 = 10;
 y = -r2 .* cos(elevr2) .* sin(azimr2);
 x = -r2 .* cos(elevr2) .* cos(azimr2);
 z = r2 .* sin(elevr2);
 
 % read inputs to and outputs of R1s
-inputs=max(h5read('retina_input0.h5','/array'),0);
-output=h5read('retina_output0_gpot.h5','/array');
+inputs = max(h5read('retina_input0.h5','/array'),0);
+inputs = inputs(:,1:10:end);
+outputs = h5read('retina_output0_gpot.h5','/array');
+outputs = outputs(:,1:10:end);
 
 R1input = inputs(1:6:end,:);
-R1 = output(1:6:end,:);
+R1 = outputs(1:6:end,:);
 
-output_caxis = [min(min(min(output(:,501:end)))), max(max(max(output(:,501:end))))];
-clear('inputs','output')
-screen = max(h5read('intensities.h5','/array'),0);
+output_caxis = [min(min(min(outputs(:,501:end)))), max(max(max(outputs(:,501:end))))];
+clear('inputs','outputs')
+screen = max(h5read('intensities0.h5','/array'),0);
 
 % read L1, L2 response
 lam = h5read('lamina_output0_gpot.h5','/array');
+lam = lam(:,1:10:end);
 
 total_columnar = 14;
 
@@ -45,7 +50,7 @@ Rb = (lam(total_columnar-5:total_columnar:total_columnar*length(elevr1),:) + ...
      lam(total_columnar-1:total_columnar:total_columnar*length(elevr1),:) + ...
      lam(total_columnar-0:total_columnar:total_columnar*length(elevr1),:))/6;
 
-
+clear('lam')
 %% visualization
 
 % setup color axis
@@ -85,12 +90,12 @@ if write_to_file
 end
 cmap = gray(256);
 
-% start iterating through frames The first 2.1 seconds are omitted
+% start iterating through frames. The first 0.21 seconds are omitted
 
-for i = 2101:10:10000-20
+for i = 211:10:1000-20
     % screen intensity
     axis1 = subplot('position', [0.05, 0.7, 0.28, 0.28]);
-    p1 = surf(x,y,z, screen(:,:,(i-1)/10+1), 'edgecolor','none');
+    p1 = surf(x,y,z, screen(:,:,(i-1)/1+1), 'edgecolor','none');
     colormap('gray')
     view(view2)
     caxis(screen_caxis)
@@ -124,7 +129,7 @@ for i = 2101:10:10000-20
     
     % 3D perspective
     axis3 = subplot('position', [0.70, 0.7, 0.28, 0.28]);
-    p3 = surf(x,y,z, screen(:,:,(i-1)/10+1), 'edgecolor','none');
+    p3 = surf(x,y,z, screen(:,:,(i-1)/1+1), 'edgecolor','none');
     colormap('gray')
     view(117,16)
     caxis(screen_caxis)
@@ -162,7 +167,7 @@ for i = 2101:10:10000-20
     
     % log of Screen intensity
     axis4 = subplot('position', [0.05, 0.375, 0.28, 0.28]);
-    p4 = surf(x,y,z, log10(screen(:,:,(i-1)/10+1)), 'edgecolor','none');
+    p4 = surf(x,y,z, log10(screen(:,:,(i-1)/1+1)), 'edgecolor','none');
     colormap('gray')
     view(view2)
     caxis(screen_caxis_gc)
