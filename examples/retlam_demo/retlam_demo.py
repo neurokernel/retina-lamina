@@ -22,6 +22,7 @@ from neurokernel.LPU.OutputProcessors.FileOutputProcessor import FileOutputProce
 from retina.screen.map.mapimpl import AlbersProjectionMap
 from retina.configreader import ConfigReader
 from retina.NDComponents.MembraneModels.Photoreceptor import Photoreceptor
+from retina.NDComponents.MembraneModels.BufferPhoton import BufferPhoton
 
 import gen_input as gi
 
@@ -100,10 +101,10 @@ def add_retina_LPU(config, retina_index, retina, manager):
     G = retina.get_worker_nomaster_graph()
     nx.write_gexf(G, gexf_file)
 
-    (comp_dict, conns) = LPU.lpu_parser_legacy(gexf_file)
+    (comp_dict, conns) = LPU.lpu_parser(gexf_file)
     retina_id = get_retina_id(retina_index)
 
-    extra_comps = [Photoreceptor]
+    extra_comps = [Photoreceptor, BufferPhoton]
 
     manager.add(LPU, retina_id, dt, comp_dict, conns,
                 device = retina_index, input_processors = [input_processor],
@@ -138,7 +139,7 @@ def add_lamina_LPU(config, lamina_index, lamina, manager):
     G = lamina.get_graph()
     nx.write_gexf(G, gexf_file)
 
-    comp_dict, conns = LPU.lpu_parser_legacy(gexf_file)
+    comp_dict, conns = LPU.lpu_parser(gexf_file)
     lamina_id = get_lamina_id(lamina_index)
     
     output_processor = FileOutputProcessor(
