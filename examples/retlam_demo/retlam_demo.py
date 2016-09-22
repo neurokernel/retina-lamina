@@ -10,17 +10,18 @@ import neurokernel.core_gpu as core
 from neurokernel.pattern import Pattern
 from neurokernel.tools.logging import setup_logger
 from neurokernel.tools.timing import Timer
+from neurokernel.LPU.LPU import LPU
 
-from retina.LPU import LPU as rLPU
-from lamina.LPU import LPU as lLPU
 import retina.retina as ret
 import lamina.lamina as lam
 
 import retina.geometry.hexagon as r_hx
 import lamina.geometry.hexagon as l_hx
-from retina.input_generator import RetinaInputGenerator
+from retina.InputProcessors.RetinaInputProcessor import RetinaInputProcessor
+from neurokernel.LPU.OutputProcessors.FileOutputProcessor import FileOutputProcessor
 from retina.screen.map.mapimpl import AlbersProjectionMap
 from retina.configreader import ConfigReader
+from retina.NDComponents.MembraneModels.Photoreceptor import Photoreceptor
 
 import gen_input as gi
 
@@ -54,7 +55,7 @@ def get_lamina_id(i):
     return 'lamina{}'.format(i)
 
 
-def add_retina_LPU(config, i, retina, manager, generator):
+def add_retina_LPU(config, retina_index, retina, manager):
     '''
         This method adds Retina LPU and its parameters to the manager
         so that it can be initialized later. Depending on configuration
@@ -78,13 +79,20 @@ def add_retina_LPU(config, i, retina, manager, generator):
     gexf_filename = config['Retina']['gexf_file']
     suffix = config['General']['file_suffix']
 
-    if generator is None:
-        input_file = '{}{}{}.h5'.format(input_filename, i, suffix)
+    output_file = '{}{}{}.h5'.format(output_filename, retina_index, suffix)
+    gexf_file = '{}{}{}.gexf.gz'.format(gexf_filename, retina_index, suffix)
+    
+    inputmethod = config['Retina']['inputmethod']
+    if inputmethod == 'read':
+        print('Generating input files')
+        with Timer('input generation'):
+            input_processor = RetinaFileInputProcessor(config, retina)
     else:
-        input_file = None
+        print('Using input generating function')
+        input_processor = RetinaInputProcessor(config, retina)
 
-    output_file = '{}{}{}.h5'.format(output_filename, i, suffix)
-    gexf_file = '{}{}{}.gexf.gz'.format(gexf_filename, i, suffix)
+    input_processor = get_input_gen(config, retina)
+    output_processor = FileOutputProcessor([('V',None)], output_file, sample_interval=1)
 
     # retina also allows a subset of its graph to be taken
     # in case it is needed later to split the retina model to more
@@ -92,17 +100,18 @@ def add_retina_LPU(config, i, retina, manager, generator):
     G = retina.get_worker_nomaster_graph()
     nx.write_gexf(G, gexf_file)
 
-    n_dict_ret, s_dict_ret = rLPU.lpu_parser(gexf_file)
-    retina_id = get_retina_id(i)
-    modules = []
+    (comp_dict, conns) = LPU.lpu_parser_legacy(gexf_file)
+    retina_id = get_retina_id(retina_index)
 
-    manager.add(rLPU, retina_id, dt, n_dict_ret, s_dict_ret,
-                input_file=input_file, output_file=output_file,
-                device=2*i, debug=debug, time_sync=time_sync,
-                modules=modules, input_generator=generator)
+    extra_comps = [Photoreceptor]
+
+    manager.add(LPU, retina_id, dt, comp_dict, conns,
+                device = retina_index, input_processors = [input_processor],
+                output_processors = [output_processor],
+                debug=debug, time_sync=time_sync, extra_comps = extra_comps)
 
 
-def add_lamina_LPU(config, i, lamina, manager):
+def add_lamina_LPU(config, lamina_index, lamina, manager):
     '''
         This method adds Lamina LPU and its parameters to the manager
         so that it can be initialized later.
@@ -124,21 +133,24 @@ def add_lamina_LPU(config, i, lamina, manager):
     debug = config['Lamina']['debug']
     time_sync = config['Lamina']['time_sync']
 
-    output_file = '{}{}{}.h5'.format(output_filename, i, suffix)
-    gexf_file = '{}{}{}.gexf.gz'.format(gexf_filename, i, suffix)
+    output_file = '{}{}{}.h5'.format(output_filename, lamina_index, suffix)
+    gexf_file = '{}{}{}.gexf.gz'.format(gexf_filename, lamina_index, suffix)
     G = lamina.get_graph()
     nx.write_gexf(G, gexf_file)
 
-    n_dict_ret, s_dict_ret = lLPU.lpu_parser(gexf_file)
-    lamina_id = get_lamina_id(i)
-    modules = []
-    manager.add(lLPU, lamina_id, dt, n_dict_ret, s_dict_ret,
-                input_file=None, output_file=output_file,
-                device=2*i+1, debug=debug, time_sync=time_sync,
-                modules=modules, input_generator=None)
+    comp_dict, conns = LPU.lpu_parser_legacy(gexf_file)
+    lamina_id = get_lamina_id(lamina_index)
+    
+    output_processor = FileOutputProcessor(
+                            [('V', None)], output_file,
+                            sample_interval=1)
+
+    manager.add(LPU, lamina_id, dt, comp_dict, conns,
+                output_processors = [output_processor],
+                device=lamina_index+1, debug=debug, time_sync=time_sync)
 
 
-def connect_retina_lamina(config, i, retina, lamina, manager):
+def connect_retina_lamina(config, index, retina, lamina, manager):
     '''
         The connections between Retina and Lamina follow
         the neural superposition rule of the fly's compound eye.
@@ -152,8 +164,8 @@ def connect_retina_lamina(config, i, retina, lamina, manager):
         lamina: lamina array object
         manager: manager object to which connection pattern will be added
     '''
-    retina_id = get_retina_id(i)
-    lamina_id = get_lamina_id(i)
+    retina_id = get_retina_id(index)
+    lamina_id = get_lamina_id(index)
     print('Connecting {} and {}'.format(retina_id, lamina_id))
 
     retina_selectors = retina.get_all_selectors()
@@ -219,7 +231,7 @@ def change_config(config, index):
         config['General']['dt'] = values[index]
 
 
-def get_input_gen(config):
+def get_input_gen(config, retina):
     '''
         Depending on configuration input can either be created
         in advance and read from file or
@@ -235,7 +247,7 @@ def get_input_gen(config):
         return None
     else:
         print('Using input generating function')
-        return RetinaInputGenerator(config)
+        return RetinaInputProcessor(config, retina)
 
 
 def get_config_obj(args):
@@ -285,34 +297,26 @@ def main():
 
     setup_logging(config)
 
-    eye_num = config['General']['eye_num']
     num_rings = config['Retina']['rings']
     eulerangles = config['Retina']['eulerangles']
     radius = config['Retina']['radius']
 
-    generator = get_input_gen(config)
-
     manager = core.Manager()
-    for i in range(eye_num):
-        with Timer('instantiation of retina and lamina #{}'.format(i)):
-            transform = AlbersProjectionMap(radius,
-                                            eulerangles[3*i:3*(i+1)]).invmap
-            r_hexagon = r_hx.HexagonArray(num_rings=num_rings, radius=radius,
-                                          transform=transform)
-            l_hexagon = l_hx.HexagonArray(num_rings=num_rings, radius=radius,
-                                          transform=transform)
+    
+    with Timer('instantiation of retina and lamina'):
+        transform = AlbersProjectionMap(radius, eulerangles).invmap
+        r_hexagon = r_hx.HexagonArray(num_rings=num_rings, radius=radius,
+                                      transform=transform)
+        l_hexagon = l_hx.HexagonArray(num_rings=num_rings, radius=radius,
+                                      transform=transform)
 
+        retina = ret.RetinaArray(r_hexagon, config)
+        lamina = lam.LaminaArray(l_hexagon, config)
 
-            retina = ret.RetinaArray(r_hexagon, config)
-            lamina = lam.LaminaArray(l_hexagon, config)
+        add_retina_LPU(config, 0, retina, manager)
+        add_lamina_LPU(config, 0, lamina, manager)
 
-            if generator is not None:
-                generator.retina = retina
-
-            add_retina_LPU(config, i, retina, manager, generator)
-            add_lamina_LPU(config, i, lamina, manager)
-
-            connect_retina_lamina(config, i, retina, lamina, manager)
+        connect_retina_lamina(config, 0, retina, lamina, manager)
 
     start_simulation(config, manager)
 
