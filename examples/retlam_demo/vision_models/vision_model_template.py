@@ -45,7 +45,8 @@ OMMATIDIA_NEURON_LIST = [
 CARTRIDGE_IN_NEURON_LIST = [
     {
         'name': 'R{}'.format(i+1), 'class': 'Port',
-        'port_type': 'gpot', 'port_io': 'in'
+        'port_type': 'gpot', 'port_io': 'in',
+        'genetic.neurotransmitter': 'histamine'
     }
     for i in range(6)
 ]
@@ -56,56 +57,64 @@ CARTRIDGE_NEURON_LIST = [
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'glutamate'
     },
     {
         'name': 'L2', 'class': 'MorrisLecar',
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'acetylcholine'
     },
     {
         'name': 'L3', 'class': 'MorrisLecar',
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'glutamate'
     },
     {
         'name': 'L4', 'class': 'MorrisLecar',
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'acetylcholine'
     },
     {
         'name': 'L5', 'class': 'MorrisLecar',
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'glutamate'
     },
     {
         'name':'T1', 'class':'MorrisLecar',
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'acetylcholine'
     },
     {
         'name':'C2', 'class':'MorrisLecar',
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'GABA'
     },
     {
         'name':'C3', 'class':'MorrisLecar',
         'V1': -1.0, 'V2': 15, 'V3': -5.0, 'V4': 10.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02
+        'phi': 0.0025, 'initV': -50., 'initn': 0.5, 'offset': 0.02,
+        'genetic.neurotransmitter': 'GABA'
     }
 ] + \
 [
@@ -120,7 +129,8 @@ AM_PARAMS = {
         'V1': -1.0, 'V2': 15, 'V3': 0.0, 'V4': 30.0,
         'V_l': -50.0, 'V_ca': 10.0, 'V_k': -70.0,
         'G_l': 0.5, 'G_ca': 1.1, 'G_k': 2.0,
-        'phi': 0.2, 'initV': -51.84, 'initn': 0.0306, 'offset': 0.0
+        'phi': 0.2, 'initV': -51.84, 'initn': 0.0306, 'offset': 0.0,
+        'genetic.neurotransmitter': 'glutamate'
 }
 
 
@@ -199,6 +209,40 @@ INTRA_CARTRIDGE_SYNAPSE_LIST = [
     'cart':None, 'reverse':HIST_RP, 'delay':1,
     'threshold':R_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
     'scale':12, 'mode':0},
+    
+    {'prename':'L2', 'postname':'R1', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L2_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':1, 'mode':0},
+    {'prename':'L2', 'postname':'R2', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L2_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':1, 'mode':0},
+    {'prename':'L2', 'postname':'L1', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L2_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':3, 'mode':0},
+    {'prename':'L2', 'postname':'L4', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L2_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':4, 'mode':0},
+    {'prename':'L2', 'postname':'L5', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L2_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':1, 'mode':0},
+
+    {'prename':'L4', 'postname':'R5', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L4_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':1, 'mode':0},
+    {'prename':'L4', 'postname':'L2', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L4_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':3, 'mode':0},
+    {'prename':'L4', 'postname':'L5', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':ACH_RP, 'delay':2,
+    'threshold':L4_THRESHOLD, 'slope':0.00002, 'power':1.0, 'saturation':0.0016,
+    'scale':1, 'mode':0},
 
     {'prename':'L2', 'postname':'L1', 'class':'PowerGPotGPot',#
     'cart':None, 'reverse':ACH_RP, 'delay':1,
@@ -328,7 +372,81 @@ INTRA_CARTRIDGE_SYNAPSE_LIST = [
     {'prename':'a6', 'postname':'T1', 'class':'PowerGPotGPot',
     'cart':None, 'reverse':AM_RP, 'delay':1,
     'threshold':AM_THRESHOLD, 'slope':0.0005, 'power':1.0, 'saturation':0.06,
-    'scale':13, 'mode':0}
+    'scale':13, 'mode':0},
+    
+    {'prename':'a2', 'postname':'R2', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0005, 'power':1.0, 'saturation':0.06,
+    'scale':1, 'mode':0},
+    {'prename':'a3', 'postname':'R4', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0005, 'power':1.0, 'saturation':0.06,
+    'scale':1, 'mode':0},
+    {'prename':'a4', 'postname':'R4', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0005, 'power':1.0, 'saturation':0.06,
+    'scale':1, 'mode':0},
+    {'prename':'a4', 'postname':'R5', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0005, 'power':1.0, 'saturation':0.06,
+    'scale':1, 'mode':0},
+    {'prename':'a5', 'postname':'R5', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0005, 'power':1.0, 'saturation':0.06,
+    'scale':1, 'mode':0},
+    
+    {'prename':'C2', 'postname':'a1', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':1, 'mode':0},
+    {'prename':'C2', 'postname':'a3', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':2, 'mode':0},
+    {'prename':'C2', 'postname':'a5', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':1, 'mode':0},
+    {'prename':'C2', 'postname':'a6', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':1, 'mode':0},
+    {'prename':'C3', 'postname':'a1', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':1, 'mode':0},
+    {'prename':'C3', 'postname':'a2', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':3, 'mode':0},
+    {'prename':'C3', 'postname':'a3', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':2, 'mode':0},
+    {'prename':'C3', 'postname':'a4', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':2, 'mode':0},
+    {'prename':'C3', 'postname':'a5', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':2, 'mode':0},
+    {'prename':'C3', 'postname':'a6', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':AM_RP, 'delay':1,
+    'threshold':AM_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':3, 'mode':0},
+    
+    {'prename':'L1', 'postname':'C2', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':GLU_RP, 'delay':1,
+    'threshold':L1_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':3, 'mode':0},
+    {'prename':'L1', 'postname':'C3', 'class':'PowerGPotGPot',
+    'cart':None, 'reverse':GLU_RP, 'delay':1,
+    'threshold':L1_THRESHOLD, 'slope':0.0002, 'power':1.0, 'saturation':0.006,
+    'scale':5, 'mode':0},
+    
+    
+    
 ]
 
 CARTRIDGE_CR_II_SYNAPSE_LIST = [

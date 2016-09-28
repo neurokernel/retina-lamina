@@ -178,17 +178,21 @@ def connect_retina_lamina(config, index, retina, lamina, manager):
         # accounts neural superposition
         rulemap = retina.rulemap
         for ret_sel in retina_selectors:
-            # format should be '/ret/<ommid>/<neuronname>'
-            _, lpu, ommid, n_name = ret_sel.split('/')
-            # find neighbor of neural superposition
-            neighborid = rulemap.neighbor_for_photor(int(ommid), n_name)
-            # format should be '/lam/<cartid>/<neuronname>'
-            lam_sel = lamina.get_selector(neighborid, n_name)
+            if not ret_sel.endswith('agg'):
+                # format should be '/ret/<ommid>/<neuronname>'
+                _, lpu, ommid, n_name = ret_sel.split('/')
+                # find neighbor of neural superposition
+                neighborid = rulemap.neighbor_for_photor(int(ommid), n_name)
+                # format should be '/lam/<cartid>/<neuronname>'
+                lam_sel = lamina.get_selector(neighborid, n_name)
 
-            # setup connection from retina to lamina
-            from_list.append(ret_sel)
-            to_list.append(lam_sel)
-
+                # setup connection from retina to lamina
+                from_list.append(ret_sel)
+                to_list.append(lam_sel)
+                
+                from_list.append(lam_sel+'_agg')
+                to_list.append(ret_sel+'_agg')
+    
         pattern = Pattern.from_concat(','.join(retina_selectors),
                                       ','.join(lamina_selectors),
                                       from_sel=','.join(from_list),
