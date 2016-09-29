@@ -23,6 +23,7 @@ from retina.screen.map.mapimpl import AlbersProjectionMap
 from retina.configreader import ConfigReader
 from retina.NDComponents.MembraneModels.Photoreceptor import Photoreceptor
 from retina.NDComponents.MembraneModels.BufferPhoton import BufferPhoton
+from retina.NDComponents.MembraneModels.BufferVoltage import BufferVoltage
 
 import gen_input as gi
 
@@ -142,13 +143,16 @@ def add_lamina_LPU(config, lamina_index, lamina, manager):
     comp_dict, conns = LPU.lpu_parser(gexf_file)
     lamina_id = get_lamina_id(lamina_index)
     
+    extra_comps = [BufferVoltage]
+    
     output_processor = FileOutputProcessor(
                             [('V', None)], output_file,
                             sample_interval=1)
 
     manager.add(LPU, lamina_id, dt, comp_dict, conns,
                 output_processors = [output_processor],
-                device=lamina_index+1, debug=debug, time_sync=time_sync)
+                device=lamina_index+1, debug=debug, time_sync=time_sync,
+                extra_comps = extra_comps)
 
 
 def connect_retina_lamina(config, index, retina, lamina, manager):
