@@ -174,7 +174,7 @@ def connect_retina_lamina(config, index, retina, lamina, manager):
     print('Connecting {} and {}'.format(retina_id, lamina_id))
 
     retina_selectors = retina.get_all_selectors()
-    lamina_selectors = lamina.get_all_selectors()
+    lamina_selectors = []#lamina.get_all_selectors()
     with Timer('creation of Pattern object'):
         from_list = []
         to_list = []
@@ -196,7 +196,9 @@ def connect_retina_lamina(config, index, retina, lamina, manager):
                 
                 from_list.append(lam_sel+'_agg')
                 to_list.append(ret_sel+'_agg')
-    
+                lamina_selectors.append(lam_sel)
+                lamina_selectors.append(lam_sel+'_agg')
+                
         pattern = Pattern.from_concat(','.join(retina_selectors),
                                       ','.join(lamina_selectors),
                                       from_sel=','.join(from_list),
