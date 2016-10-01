@@ -102,7 +102,7 @@ def add_retina_LPU(config, retina_index, retina, manager):
     G = retina.get_worker_nomaster_graph()
     nx.write_gexf(G, gexf_file)
 
-    (comp_dict, conns) = LPU.lpu_parser(gexf_file)
+    (comp_dict, conns) = LPU.graph_to_dicts(G)
     retina_id = get_retina_id(retina_index)
 
     extra_comps = [Photoreceptor, BufferPhoton]
@@ -140,7 +140,7 @@ def add_lamina_LPU(config, lamina_index, lamina, manager):
     G = lamina.get_graph()
     nx.write_gexf(G, gexf_file)
 
-    comp_dict, conns = LPU.lpu_parser(gexf_file)
+    (comp_dict, conns) = LPU.graph_to_dicts(G)
     lamina_id = get_lamina_id(lamina_index)
     
     extra_comps = [BufferVoltage]
