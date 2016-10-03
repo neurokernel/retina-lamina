@@ -116,7 +116,7 @@ def add_retina_LPU(config, retina_index, retina, manager, graph):
     for pr in prs:
         g_lpu_nk_0.node[pr]['num_microvilli'] = 3000
     
-#    nx.write_gexf(G, gexf_file)
+    nx.write_gexf(g_lpu_nk_0, gexf_file)
 
     (comp_dict, conns) = LPU.graph_to_dicts(g_lpu_nk_0)
     retina_id = get_retina_id(retina_index)
@@ -160,6 +160,7 @@ def add_lamina_LPU(config, lamina_index, lamina, manager, graph):
     g_lpu_na_0 = node_lpu_0.traverse_owns(max_levels = 2).get_as('nx')
     g_lpu_nk_0 = nk.na_lpu_to_nk_new(g_lpu_na_0)
 
+    nx.write_gexf(g_lpu_nk_0, gexf_file)
     comp_dict, conns = LPU.graph_to_dicts(g_lpu_nk_0)
     lamina_id = get_lamina_id(lamina_index)
     
@@ -192,47 +193,21 @@ def connect_retina_lamina(config, index, retina, lamina, manager, graph):
     retina_id = get_retina_id(index)
     lamina_id = get_lamina_id(index)
     print('Connecting {} and {}'.format(retina_id, lamina_id))
+
     
     node_pat = graph.Patterns.query(name='retina-lamina').one()
     g_pat_na = node_pat.traverse_owns(max_levels = 2).get_as('nx')
     g_pat_nk = nk.na_pat_to_nk(g_pat_na)
-    pattern = Pattern.from_graph(nx.DiGraph(g_pat_nk))
-#    retina_selectors = retina.get_all_selectors()
-#    lamina_selectors = []#lamina.get_all_selectors()
-#    with Timer('creation of Pattern object'):
-#        from_list = []
-#        to_list = []
-#
-#        # accounts neural superposition
-#        rulemap = retina.rulemap
-#        for ret_sel in retina_selectors:
-#            if not ret_sel.endswith('agg'):
-#                # format should be '/ret/<ommid>/<neuronname>'
-#                _, lpu, ommid, n_name = ret_sel.split('/')
-#                # find neighbor of neural superposition
-#                neighborid = rulemap.neighbor_for_photor(int(ommid), n_name)
-#                # format should be '/lam/<cartid>/<neuronname>'
-#                lam_sel = lamina.get_selector(neighborid, n_name)
-#
-#                # setup connection from retina to lamina
-#                from_list.append(ret_sel)
-#                to_list.append(lam_sel)
-#                
-#                from_list.append(lam_sel+'_agg')
-#                to_list.append(ret_sel+'_agg')
-#                lamina_selectors.append(lam_sel)
-#                lamina_selectors.append(lam_sel+'_agg')
-#                
-#        pattern = Pattern.from_concat(','.join(retina_selectors),
-#                                      ','.join(lamina_selectors),
-#                                      from_sel=','.join(from_list),
-#                                      to_sel=','.join(to_list),
-#                                      gpot_sel=','.join(from_list+to_list))
-#        nx.write_gexf(pattern.to_graph(), retina_id+'_'+lamina_id+'.gexf.gz',
-#                      prettyprint=True)
 
+    pattern, key_order = Pattern.from_graph(nx.DiGraph(g_pat_nk))
+
+    nx.write_gexf(pattern.to_graph(), retina_id+'_'+lamina_id+'.gexf.gz',
+                      prettyprint=True)
+    
     with Timer('update of connections in Manager'):
-        manager.connect(retina_id, lamina_id, pattern)
+        manager.connect(retina_id, lamina_id, pattern,
+                        int_0 = key_order.index('retina'),
+                        int_1 = key_order.index('lamina'))
 
 
 def start_simulation(config, manager):
