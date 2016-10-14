@@ -102,7 +102,6 @@ def add_retina_LPU(config, retina_index, retina, manager, graph):
         print('Using input generating function')
         input_processor = RetinaInputProcessor(config, retina)
 
-    input_processor = get_input_gen(config, retina)
     output_processor = FileOutputProcessor([('V',None)], output_file, sample_interval=1)
 
     # retina also allows a subset of its graph to be taken

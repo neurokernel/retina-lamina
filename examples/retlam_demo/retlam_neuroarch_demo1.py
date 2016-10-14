@@ -6,18 +6,27 @@ import argparse
 import numpy as np
 import networkx as nx
 
+from pyorient.ogm import Graph, Config
+import pyorient.ogm.graph
+
+setattr(pyorient.ogm.graph, 'orientdb_version',
+        pyorient.ogm.graph.ServerVersion)
+
 import neurokernel.core_gpu as core
 from neurokernel.pattern import Pattern
 from neurokernel.tools.logging import setup_logger
 from neurokernel.tools.timing import Timer
 from neurokernel.LPU.LPU import LPU
 
+import neuroarch.models as models
+import neuroarch.nk as nk
+
 import retina.retina as ret
 import lamina.lamina as lam
 
 import retina.geometry.hexagon as r_hx
 import lamina.geometry.hexagon as l_hx
-from retina.InputProcessors.RetinaInputProcessor import RetinaInputProcessor
+from retina.InputProcessors.RetinaInputIndividual import RetinaInputIndividual
 from neurokernel.LPU.OutputProcessors.FileOutputProcessor import FileOutputProcessor
 from retina.screen.map.mapimpl import AlbersProjectionMap
 from retina.configreader import ConfigReader
@@ -57,7 +66,7 @@ def get_lamina_id(i):
     return 'lamina{}'.format(i)
 
 
-def add_retina_LPU(config, retina_index, retina, manager):
+def add_retina_LPU(config, retina_index, manager, graph):
     '''
         This method adds Retina LPU and its parameters to the manager
         so that it can be initialized later. Depending on configuration
@@ -84,24 +93,32 @@ def add_retina_LPU(config, retina_index, retina, manager):
     output_file = '{}{}{}.h5'.format(output_filename, retina_index, suffix)
     gexf_file = '{}{}{}.gexf.gz'.format(gexf_filename, retina_index, suffix)
     
+    # retina also allows a subset of its graph to be taken
+    # in case it is needed later to split the retina model to more
+    # GPUs
+#    G = retina.get_worker_nomaster_graph()
+    node_lpu_0 = graph.LPUs.query(name='retina').one()
+    g_lpu_na_0 = node_lpu_0.traverse_owns(max_levels = 2).get_as('nx')
+    g_lpu_nk_0 = nk.na_lpu_to_nk_new(g_lpu_na_0)
+    prs = [node for node in g_lpu_nk_0.nodes(data=True) if node[1]['class'] == 'Photoreceptor']
+    for pr in prs:
+        g_lpu_nk_0.node[pr[0]]['num_microvilli'] = 3000
+    
+    nx.write_gexf(g_lpu_nk_0, gexf_file)
+
     inputmethod = config['Retina']['inputmethod']
     if inputmethod == 'read':
         print('Generating input files')
+        print('Reading retina input from file is not supported yet')
         with Timer('input generation'):
             input_processor = RetinaFileInputProcessor(config, retina)
     else:
         print('Using input generating function')
-        input_processor = RetinaInputProcessor(config, retina)
+        input_processor = RetinaInputIndividual(config, prs)
 
     output_processor = FileOutputProcessor([('V',None)], output_file, sample_interval=1)
 
-    # retina also allows a subset of its graph to be taken
-    # in case it is needed later to split the retina model to more
-    # GPUs
-    G = retina.get_worker_nomaster_graph()
-    nx.write_gexf(G, gexf_file)
-
-    (comp_dict, conns) = LPU.graph_to_dicts(G)
+    (comp_dict, conns) = LPU.graph_to_dicts(g_lpu_nk_0)
     retina_id = get_retina_id(retina_index)
 
     extra_comps = [Photoreceptor, BufferPhoton]
@@ -112,7 +129,7 @@ def add_retina_LPU(config, retina_index, retina, manager):
                 debug=debug, time_sync=time_sync, extra_comps = extra_comps)
 
 
-def add_lamina_LPU(config, lamina_index, lamina, manager):
+def add_lamina_LPU(config, lamina_index, manager, graph):
     '''
         This method adds Lamina LPU and its parameters to the manager
         so that it can be initialized later.
@@ -136,10 +153,15 @@ def add_lamina_LPU(config, lamina_index, lamina, manager):
 
     output_file = '{}{}{}.h5'.format(output_filename, lamina_index, suffix)
     gexf_file = '{}{}{}.gexf.gz'.format(gexf_filename, lamina_index, suffix)
-    G = lamina.get_graph()
-    nx.write_gexf(G, gexf_file)
+#    G = lamina.get_graph()
+#    nx.write_gexf(G, gexf_file)
 
-    (comp_dict, conns) = LPU.graph_to_dicts(G)
+    node_lpu_0 = graph.LPUs.query(name='lamina').one()
+    g_lpu_na_0 = node_lpu_0.traverse_owns(max_levels = 2).get_as('nx')
+    g_lpu_nk_0 = nk.na_lpu_to_nk_new(g_lpu_na_0)
+
+    nx.write_gexf(g_lpu_nk_0, gexf_file)
+    comp_dict, conns = LPU.graph_to_dicts(g_lpu_nk_0)
     lamina_id = get_lamina_id(lamina_index)
     
     extra_comps = [BufferVoltage]
@@ -154,7 +176,7 @@ def add_lamina_LPU(config, lamina_index, lamina, manager):
                 extra_comps = extra_comps)
 
 
-def connect_retina_lamina(config, index, retina, lamina, manager):
+def connect_retina_lamina(config, index, manager, graph):
     '''
         The connections between Retina and Lamina follow
         the neural superposition rule of the fly's compound eye.
@@ -172,42 +194,20 @@ def connect_retina_lamina(config, index, retina, lamina, manager):
     lamina_id = get_lamina_id(index)
     print('Connecting {} and {}'.format(retina_id, lamina_id))
 
-    retina_selectors = retina.get_all_selectors()
-    lamina_selectors = []#lamina.get_all_selectors()
-    with Timer('creation of Pattern object'):
-        from_list = []
-        to_list = []
+    
+    node_pat = graph.Patterns.query(name='retina-lamina').one()
+    g_pat_na = node_pat.traverse_owns(max_levels = 2).get_as('nx')
+    g_pat_nk = nk.na_pat_to_nk(g_pat_na)
 
-        # accounts neural superposition
-        rulemap = retina.rulemap
-        for ret_sel in retina_selectors:
-            if not ret_sel.endswith('agg'):
-                # format should be '/ret/<ommid>/<neuronname>'
-                _, lpu, ommid, n_name = ret_sel.split('/')
-                # find neighbor of neural superposition
-                neighborid = rulemap.neighbor_for_photor(int(ommid), n_name)
-                # format should be '/lam/<cartid>/<neuronname>'
-                lam_sel = lamina.get_selector(neighborid, n_name)
+    pattern, key_order = Pattern.from_graph(nx.DiGraph(g_pat_nk))
 
-                # setup connection from retina to lamina
-                from_list.append(ret_sel)
-                to_list.append(lam_sel)
-                
-                from_list.append(lam_sel+'_agg')
-                to_list.append(ret_sel+'_agg')
-                lamina_selectors.append(lam_sel)
-                lamina_selectors.append(lam_sel+'_agg')
-                
-        pattern = Pattern.from_concat(','.join(retina_selectors),
-                                      ','.join(lamina_selectors),
-                                      from_sel=','.join(from_list),
-                                      to_sel=','.join(to_list),
-                                      gpot_sel=','.join(from_list+to_list))
-        nx.write_gexf(pattern.to_graph(), retina_id+'_'+lamina_id+'.gexf.gz',
+    nx.write_gexf(pattern.to_graph(), retina_id+'_'+lamina_id+'_new.gexf.gz',
                       prettyprint=True)
-
+    
     with Timer('update of connections in Manager'):
-        manager.connect(retina_id, lamina_id, pattern)
+        manager.connect(retina_id, lamina_id, pattern,
+                        int_0 = key_order.index('retina'),
+                        int_1 = key_order.index('lamina'))
 
 
 def start_simulation(config, manager):
@@ -311,22 +311,18 @@ def main():
     eulerangles = config['Retina']['eulerangles']
     radius = config['Retina']['radius']
 
+    graph = Graph(Config.from_url('/yiyin_vision', 'admin', 'admin',
+                                   initial_drop=False))
+    models.create_efficiently(graph, models.Node.registry)
+    models.create_efficiently(graph, models.Relationship.registry)
+
     manager = core.Manager()
     
     with Timer('instantiation of retina and lamina'):
-        transform = AlbersProjectionMap(radius, eulerangles).invmap
-        r_hexagon = r_hx.HexagonArray(num_rings=num_rings, radius=radius,
-                                      transform=transform)
-        l_hexagon = l_hx.HexagonArray(num_rings=num_rings, radius=radius,
-                                      transform=transform)
+        add_retina_LPU(config, 0, manager, graph)
+        add_lamina_LPU(config, 0, manager, graph)
 
-        retina = ret.RetinaArray(r_hexagon, config)
-        lamina = lam.LaminaArray(l_hexagon, config)
-
-        add_retina_LPU(config, 0, retina, manager)
-        add_lamina_LPU(config, 0, lamina, manager)
-
-        connect_retina_lamina(config, 0, retina, lamina, manager)
+        connect_retina_lamina(config, 0, manager, graph)
 
     start_simulation(config, manager)
 
