@@ -111,7 +111,7 @@ def add_retina_LPU(config, retina_index, retina, manager, graph):
     node_lpu_0 = graph.LPUs.query(name='retina').one()
     g_lpu_na_0 = node_lpu_0.traverse_owns(max_levels = 2).get_as('nx')
     g_lpu_nk_0 = nk.na_lpu_to_nk_new(g_lpu_na_0)
-    prs = [node for node in g_lpu_nk_0.nodes() if g_lpu_nk_0.node[node]['class'] == 'Photoreceptor']
+    prs = [node for node in g_lpu_nk_0.nodes() if g_lpu_nk_0.node[node]['class'] == 'PhotoreceptorModel']
     for pr in prs:
         g_lpu_nk_0.node[pr]['num_microvilli'] = 3000
     
