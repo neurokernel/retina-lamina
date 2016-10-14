@@ -30,7 +30,7 @@ from retina.InputProcessors.RetinaInputProcessor import RetinaInputProcessor
 from neurokernel.LPU.OutputProcessors.FileOutputProcessor import FileOutputProcessor
 from retina.screen.map.mapimpl import AlbersProjectionMap
 from retina.configreader import ConfigReader
-from retina.NDComponents.MembraneModels.Photoreceptor import Photoreceptor
+from retina.NDComponents.MembraneModels.Photoreceptor import PhotoreceptorModel
 from retina.NDComponents.MembraneModels.BufferPhoton import BufferPhoton
 from retina.NDComponents.MembraneModels.BufferVoltage import BufferVoltage
 
@@ -120,7 +120,7 @@ def add_retina_LPU(config, retina_index, retina, manager, graph):
     (comp_dict, conns) = LPU.graph_to_dicts(g_lpu_nk_0)
     retina_id = get_retina_id(retina_index)
 
-    extra_comps = [Photoreceptor, BufferPhoton]
+    extra_comps = [PhotoreceptorModel, BufferPhoton]
 
     manager.add(LPU, retina_id, dt, comp_dict, conns,
                 device = retina_index, input_processors = [input_processor],
