@@ -14,7 +14,7 @@ from setuptools import setup
 
 
 NAME =               'neurokernel-retlam'
-VERSION =            '1.0'
+VERSION =            '1.1'
 AUTHOR =             'Neurokernel Development Team'
 AUTHOR_EMAIL =       'neurokernel-dev@columbia.edu'
 URL =                'https://github.com/neurokernel/retina-lamina'
@@ -60,8 +60,8 @@ if __name__ == "__main__":
         install_requires=[
             'configobj >= 5.0.0',
             'neurokernel >= 0.1',
-            'neurokernel-retina >= 1.0',
-            'neurokernel-lamina >= 1.0'
+            'neurokernel-retina >= 1.1',
+            'neurokernel-lamina >= 1.1'
         ],
         dependency_links=[
             'https://github.com/neurokernel/retina/tarball/master#egg=neurokernel-retina-1.0',
