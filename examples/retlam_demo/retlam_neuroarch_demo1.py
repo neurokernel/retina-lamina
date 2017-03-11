@@ -96,7 +96,6 @@ def add_retina_LPU(config, retina_index, manager, graph):
     # retina also allows a subset of its graph to be taken
     # in case it is needed later to split the retina model to more
     # GPUs
-#    G = retina.get_worker_nomaster_graph()
     node_lpu_0 = graph.LPUs.query(name='retina').one()
     g_lpu_na_0 = node_lpu_0.traverse_owns(max_levels = 2).get_as('nx')
     g_lpu_nk_0 = nk.na_lpu_to_nk_new(g_lpu_na_0)
@@ -154,8 +153,6 @@ def add_lamina_LPU(config, lamina_index, manager, graph):
 
     output_file = '{}{}{}.h5'.format(output_filename, lamina_index, suffix)
     gexf_file = '{}{}{}.gexf.gz'.format(gexf_filename, lamina_index, suffix)
-#    G = lamina.get_graph()
-#    nx.write_gexf(G, gexf_file)
 
     node_lpu_0 = graph.LPUs.query(name='lamina').one()
     g_lpu_na_0 = node_lpu_0.traverse_owns(max_levels = 2).get_as('nx')
@@ -312,7 +309,7 @@ def main():
     eulerangles = config['Retina']['eulerangles']
     radius = config['Retina']['radius']
 
-    graph = Graph(Config.from_url('/yiyin_vision', 'admin', 'admin',
+    graph = Graph(Config.from_url('/retina_lamina', 'admin', 'admin',
                                    initial_drop=False))
     models.create_efficiently(graph, models.Node.registry)
     models.create_efficiently(graph, models.Relationship.registry)
